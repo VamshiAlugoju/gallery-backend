@@ -48,11 +48,12 @@ app.use((error,req,res,next)=>{
  
  const env =dotenv.config().parsed
 
+ const PORT = 5000;
 mongoose
 .connect(`mongodb+srv://${env.DBUSER}:${env.DBPASSWORD}@cluster0.lle7vij.mongodb.net/${env.DBNAME}?retryWrites=true&w=majority`)
 .then(()=>
 {
-  app.listen(`0.0.0.0:$PORT`,()=>{console.log("connection started")})
+  app.listen(PORT,()=>{console.log( PORT, " connection started")})
    console.log(mongoose.connection.port)
 })
 .catch(err=>console.log(err))
