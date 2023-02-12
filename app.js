@@ -52,8 +52,8 @@ mongoose
 .connect(`mongodb+srv://${env.DBUSER}:${env.DBPASSWORD}@cluster0.lle7vij.mongodb.net/${env.DBNAME}?retryWrites=true&w=majority`)
 .then(()=>
 {
-  app.listen(5000,()=>{console.log("connection started")})
- 
+  app.listen(`0.0.0.0:$PORT`,()=>{console.log("connection started")})
+   console.log(mongoose.connection.port)
 })
 .catch(err=>console.log(err))
 
