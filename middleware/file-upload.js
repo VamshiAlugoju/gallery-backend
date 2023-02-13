@@ -5,10 +5,10 @@ const { v4 } = require("uuid")
  const dotenv = require("dotenv")
   const fs = require("fs")
  const env = dotenv.config().parsed
- const bucket = env.AWS_BUCKET_NAME
- const accesskey = env.AWS_ACCESS_KEY
- const secretkey  =env.AWS_SECRET_KEY
- const region = env.AWS_BUCKET_REGION
+ const bucket ="vamshi224"
+ const accesskey = "AKIAZLZBKZ5EB7QLR52S"
+ const secretkey  ="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"
+ const region = "ap-south-1"
   
  
 
