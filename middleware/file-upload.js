@@ -9,7 +9,8 @@ const { v4 } = require("uuid")
  const accesskey = env.AWS_ACCESS_KEY
  const secretkey  =env.AWS_SECRET_KEY
  const region = env.AWS_BUCKET_REGION
-
+  
+ 
 
  const s3 = new S3({
     region,
