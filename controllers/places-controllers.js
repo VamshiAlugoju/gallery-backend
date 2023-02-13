@@ -5,10 +5,11 @@ const Place = require("../models/place");
 const User = require("../models/user");
 const mongoose = require("mongoose")
 const fs = require("fs")
- 
+ const middlewares = require("../middleware/file-upload")
 
 const getPlacebyId = async (req, res, next) => {
-  
+
+  const key = req.params.uid
   const placeId = req.params.uid;
 
   let place;
@@ -17,7 +18,6 @@ const getPlacebyId = async (req, res, next) => {
   } catch (err) {
     const error = new HttpError("could not find a place", 500);
     return next(error);
-    place = await Place.findById(placeId);
   }
 
   if (!place) {
@@ -52,7 +52,6 @@ const getPlacebyuserId = async (req, res, next) => {
     );
     return next(error);
   }
-
   res.json({ place });
 };
 
@@ -63,7 +62,15 @@ const createPlace = async (req, res, next) => {
   // if(!errors.isEmpty){
   //     throw new HttpError("invalid inputs" , 402)
   // }
-
+    const file = req.file
+    console.log(file)
+     let result
+    try{
+       result = await middlewares.uploads(file)
+        console.log(result)
+    }catch(err){
+      console.log(err)
+    }
   const { title, description, address, creator } = req.body;
 
   let coordinates;
@@ -79,13 +86,12 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image:req.file.path,
-    creator,
+    image:result.Key,
+    creator
   });
-
+ 
   let user;
   
-
   try {
     user = await User.findById(creator);
   } catch (err) {
@@ -95,20 +101,22 @@ const createPlace = async (req, res, next) => {
   if (!user) {
     return next(new HttpError("the user is not found in db"), 404);
   }
-
-
+   console.log(user , createdPlace)
+ 
   try {
-    
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess });
     await user.places.push(createdPlace); // push is not a usual javascript array method here its a mongoose method
     await user.save({ session: sess });
     await sess.commitTransaction();
+     console.log("pushed")
   } catch (err) {
+      console.log(err)
     const error = new HttpError("hello this is an error", 406);
     return next(error);
   }
+   
   res.json(createdPlace);
 };
 
@@ -147,19 +155,19 @@ const updatePlace = async (req, res, next) => {
 
 const DeletePlace = async (req, res, next) => {
 
-  
-
   const placeId = req.params.pid;
 
   let place;
+  let key ;
   try {
     place = await Place.findById(placeId);
+     key = place.image;
   } catch (err) {
     const error = new HttpError("the place could not be found", 404);
     return next(error);
   }
    
-  let imagePath = place.image
+  
   let user;
   try{
     user  = await User.findById(place.creator)
@@ -171,9 +179,8 @@ const DeletePlace = async (req, res, next) => {
   {
     return next(new HttpError("the user is not found") , 404)
   }
-
    
-
+   
   try {
     const sess = await mongoose.startSession()
     sess.startTransaction()
@@ -186,7 +193,14 @@ const DeletePlace = async (req, res, next) => {
     return next(error);
   }
 
-  fs.unlink(imagePath,err=>{console.log(err)})
+  let deleteOperation;
+  try{
+    deleteOperation = await middlewares.deletefile(key)
+  }
+  catch(err){
+      console.log( "the error is ", err)
+  }
+  fs.unlink( "uploads/"+key,err=>{console.log(err)})
 
   res.status(200).json(place);
 };

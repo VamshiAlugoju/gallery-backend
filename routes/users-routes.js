@@ -1,15 +1,16 @@
 const  express = require("express");
 const router  = express.Router();
 const {check} = require("express-validator")
-const fileupload = require("../middleware/file-upload")
+const middleware = require("../middleware/file-upload")
 const UserControllers = require("../controllers/user-controllers.js")
-
+const multer = require("multer")
+const upload = multer({dest:"uploads/"})
 
 
 router.get("/" , UserControllers.getallUsers)
 
 router.post("/signUp",  
-      fileupload.single("image"),
+      upload.single("image"),
 [
     check("id").not().isEmpty(),
     check("name").not().isEmpty(),

@@ -7,6 +7,7 @@ const  Placesroutes  = require( "./routes/places-routes");
 const UserRoutes = require("./routes/users-routes")
 const HttpError = require("./models/HttpError");
 const path = require("path") ;
+const middleware = require("./middleware/file-upload")
 
 const app  = express()
 
@@ -22,14 +23,24 @@ app.use((req,res,next)=>{
   
   next()
 })
- 
+
+app.get("/images/:key" , (req,res)=>{
+
+   const key = req.params.key;
+   const img = middleware.downloadfile(key)
+    img.pipe(res) 
+}) 
+
 app.use( "/api/Places", Placesroutes)
 app.use("/api/users",UserRoutes)
+
 
 app.use((req,res,next)=>{ 
     const err = new HttpError("404 Error")
     throw err
 })
+
+
 // gets called whenever an error occured in the above routes
 app.use((error,req,res,next)=>{
      
@@ -46,9 +57,11 @@ app.use((error,req,res,next)=>{
       res.json({message:error.message || "an unknown error occured"})
 })
  
+ 
  const env =dotenv.config().parsed
 
- const PORT = process.env.PORT;
+ const PORT = 5000;
+ console.log( "port is ", PORT)
 mongoose
 .connect(`mongodb+srv://${env.DBUSER}:${env.DBPASSWORD}@cluster0.lle7vij.mongodb.net/${env.DBNAME}?retryWrites=true&w=majority`)
 .then(()=>

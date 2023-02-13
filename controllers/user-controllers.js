@@ -3,6 +3,7 @@ const HttpError = require("../models/HttpError")
 const User = require("../models/user")
  const bcrypt =  require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const middleware = require("../middleware/file-upload")
 
 const getallUsers =async (req,res,next)=>{
        
@@ -31,8 +32,17 @@ const signUp = async (req,res,next)=>{
     //     return next(error)
     // }
      const {name,email,password} = req.body
+       
+     let uploadimg; 
 
-      let hasuser  
+     try{
+      uploadimg = await middleware.uploads(req.file)
+     }catch(err)
+     {
+         console.log(err)
+     }
+      
+      let hasuser;
       try{  
          hasuser = await User.findOne({Email:email})
       }catch(err){
@@ -54,7 +64,7 @@ const signUp = async (req,res,next)=>{
         name:name,
         Email:email,
         password:hashedPassword,
-        image:req.file.path,
+        image:uploadimg.Key,
         places:[]
       })
      
